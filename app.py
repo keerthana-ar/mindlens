@@ -1,12 +1,12 @@
 import streamlit as st
 from emotion_model.classifier import get_top_emotion
 import json
-import openai
+from openai import OpenAI
 import os
 from dotenv import load_dotenv
-
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Load prompts
 with open("prompts/emotion_to_prompt.json", "r") as f:
@@ -16,12 +16,11 @@ def generate_reflection(emotion, text):
     prompt = emotion_prompts.get(emotion.lower(), "Provide a thoughtful response.")
     full_prompt = f"{prompt}\n\nUser's entry:\n{text}"
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": full_prompt}],
-        temperature=0.7
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[{"role": "user", "content": full_prompt}],
+    temperature=0.7)
+    return response.choices[0].message.content
 
 # --- Streamlit UI ---
 st.set_page_config(page_title="MindLens", page_icon="🧠", layout="centered")
