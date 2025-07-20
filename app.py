@@ -2,7 +2,7 @@ import streamlit as st
 
 # MUST BE FIRST - Set page config before any other Streamlit commands
 st.set_page_config(
-    page_title="MindLens - AI Emotion Journal", 
+    page_title="mindlens - AI emotion journal", 
     page_icon="🧠", 
     layout="wide",
     initial_sidebar_state="expanded"
@@ -41,14 +41,14 @@ def initialize_openai_client():
     try:
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            return None, "OpenAI API key not found. Please add it to your .env file."
+            return None, "OpenAI API key not found. Using offline reflections."
         
         client = OpenAI(api_key=api_key, timeout=30.0)
         client.models.list()  # Test connection
         return client, None
         
     except Exception as e:
-        return None, f"Failed to initialize OpenAI client: {str(e)}"
+        return None, f"OpenAI unavailable. Using offline reflections. ({str(e)})"
 
 # Load prompts with error handling
 @st.cache_data
@@ -63,6 +63,10 @@ def load_emotion_prompts():
 
 def generate_reflection(client, emotion_prompts, emotion, text, user_id):
     """Generate AI reflection with enhanced prompting"""
+    # Check if OpenAI client is available
+    if client is None:
+        return generate_fallback_reflection(emotion, text)
+    
     try:
         base_prompt = emotion_prompts.get(emotion.lower(), "Provide a thoughtful response.")
         
@@ -90,8 +94,56 @@ def generate_reflection(client, emotion_prompts, emotion, text, user_id):
         )
         return response.choices[0].message.content
     except Exception as e:
-        return f"I'm having trouble generating a reflection right now. Please try again later. Error: {str(e)}"
+        # If API fails, use fallback reflection
+        return generate_fallback_reflection(emotion, text)
 
+def generate_fallback_reflection(emotion, text):
+    """Generate a fallback reflection when OpenAI API is unavailable"""
+    fallback_reflections = {
+        'sadness': """I can sense that you're going through a difficult time right now, and I want you to know that your feelings are completely valid. It's okay to feel down sometimes - it's a natural part of the human experience.
+        
+        When we're feeling low, it can help to remember that emotions are temporary, like weather patterns that pass through our lives. Consider reaching out to someone you trust, engaging in gentle self-care activities, or simply allowing yourself to feel these emotions without judgment.
+        
+        You've taken a positive step by expressing your feelings here. Sometimes just putting our thoughts into words can provide a small sense of relief. Be gentle with yourself during this time.""",
+        
+        'joy': """It's wonderful to see you experiencing joy! These positive moments are precious and worth celebrating, no matter how big or small they might seem.
+        
+        Joy has a beautiful way of reminding us of life's goodness and our capacity for happiness. Try to savor this feeling and perhaps reflect on what brought it about - this awareness can help you cultivate more joyful moments in the future.
+        
+        Thank you for sharing this brightness with me. Your positive energy is contagious and serves as a reminder that good things do happen.""",
+        
+        'anger': """I can feel the intensity of your emotions right now, and it's completely understandable to feel angry sometimes. Anger often signals that something important to us has been threatened or violated.
+        
+        While anger is a valid emotion, finding healthy ways to express and process it is important. Consider taking some deep breaths, going for a walk, or writing about what's triggering these feelings. Sometimes anger can reveal what we truly value and care about.
+        
+        Remember that you have the power to choose how you respond to these feelings. Be patient with yourself as you work through this.""",
+        
+        'fear': """I can sense your anxiety and want you to know that feeling afraid is a normal human response. Fear often arises when we're facing uncertainty or stepping outside our comfort zones.
+        
+        While fear can feel overwhelming, it can also be a sign that you're about to do something meaningful or challenging. Try some grounding techniques like deep breathing or focusing on what you can control in this moment.
+        
+        You're braver than you believe, and you've overcome challenges before. Take things one step at a time, and remember that it's okay to ask for support when you need it.""",
+        
+        'love': """What a beautiful emotion to be experiencing! Love in all its forms - whether for family, friends, partners, or even for life itself - is one of our most powerful and meaningful feelings.
+        
+        Love connects us to others and reminds us of our capacity for deep connection and care. Cherish these feelings and consider expressing your love to those who matter to you - it often comes back multiplied.
+        
+        Thank you for sharing this warmth. Love is a gift that grows when shared, and your openness about these feelings spreads positivity.""",
+        
+        'surprise': """Life has a way of surprising us, doesn't it? Whether this surprise is positive or challenging, unexpected moments often teach us something new about ourselves or the world around us.
+        
+        Surprises can shake up our routines and perspectives in ways that lead to growth and new understanding. Take a moment to reflect on what this unexpected experience might be showing you.
+        
+        Embrace the unpredictability of life - it's often in these surprising moments that we discover new possibilities and strengths we didn't know we had.""",
+        
+        'neutral': """Sometimes a calm, balanced emotional state is exactly what we need. There's wisdom in neutrality - it can provide clarity and space for reflection.
+        
+        Use this peaceful moment to check in with yourself. What are you grateful for? What are your hopes and intentions moving forward? Neutral states can be perfect times for mindful awareness and gentle planning.
+        
+        Remember that all emotional states are temporary and valuable in their own way. This balance you're experiencing is a form of emotional wellness."""
+    }
+    
+    return fallback_reflections.get(emotion.lower(), fallback_reflections['neutral'])
 # Custom CSS for modern design
 def load_custom_css():
     st.markdown("""
@@ -300,8 +352,8 @@ def render_header():
     """Render the main header with modern design"""
     st.markdown("""
     <div class="main-header">
-        <div class="main-title">🧠 MindLens</div>
-        <div class="main-subtitle">AI-Powered Emotion Journal & Mental Wellness Companion</div>
+        <div class="main-title">🧠 mindlens</div>
+        <div class="main-subtitle">AI-Powered emotion journal & mental wellness companion</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -500,9 +552,8 @@ def main():
     
     # Display any initialization errors
     if client_error:
-        st.error(client_error)
-        st.info("Please check your .env file and ensure your OpenAI API key is correctly set.")
-        return
+        st.warning(client_error)
+        st.info("The app will work with offline reflections. Add your OpenAI API key to .env for AI-powered reflections.")
     
     if prompts_error:
         st.error(prompts_error)
@@ -649,7 +700,7 @@ def main():
             
             st.markdown("#### ℹ️ About")
             st.info("""
-            **MindLens v2.0**
+            **mindlens v2.0**
             
             An AI-powered emotional wellness companion that helps you understand and reflect on your feelings through intelligent journaling.
             
