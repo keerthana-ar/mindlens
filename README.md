@@ -23,9 +23,5 @@ OPENAI_API_KEY=your_key_here
 ```bash
 streamlit run app.py
 ```
-
-## 🧠 Preview
-![screenshot](assets/mindlens-preview.png) *(Optional: add if available)*
-
 ---
 Built with &#10084; by Keerthana
