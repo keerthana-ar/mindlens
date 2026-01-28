@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+  --foreground-rgb: 236, 237, 238;
+  /* zinc-200 */
+  --background-start-rgb: 9, 9, 11;
+  /* zinc-950 */
+  --background-end-rgb: 9, 9, 11;
+  /* zinc-950 */
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-start-rgb));
+  font-family: var(--font-inter), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-playfair), serif;
+}
+
+/* Glassmorphism Utilities */
+@layer utilities {
+  .glass-panel {
+    @apply bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-2xl;
+  }
+
+  .glass-input {
+    @apply bg-transparent border-none text-xl resize-none focus:ring-0 placeholder:text-zinc-600;
+  }
+}

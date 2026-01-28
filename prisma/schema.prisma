@@ -1,0 +1,22 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://neondb_owner:npg_DQGx25YyNiWz@ep-wispy-band-ahcjkbi5-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+}
+
+model JournalEntry {
+  id        String   @id @default(uuid())
+  userId    String   @default("legacy_user") // Default for backward compatibility during migration
+  content   String
+  emotion   String
+  score     Float
+  reflection String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
