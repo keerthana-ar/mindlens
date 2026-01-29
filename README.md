@@ -5,7 +5,6 @@ MindLens is an intelligent journaling application that uses AI to analyze your d
 ## 🚀 Live Demo
 
 [**View Live Demo**](https://mindlens-ten.vercel.app/)
-*(Note: If your Vercel URL is different, please update this link!)*
 
 ## ✨ Features
 
